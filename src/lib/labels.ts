@@ -25,15 +25,15 @@ export const LIQUIDITY_LABELS: Record<Liquidity, string> = {
 };
 
 export const TYPE_COLORS: Record<InvestmentType, string> = {
-  CDB: "#6366f1",
-  LCI: "#22c55e",
-  LCA: "#14b8a6",
-  LC: "#a855f7",
-  TESOURO_SELIC: "#f59e0b",
-  TESOURO_PREFIXADO: "#ef4444",
-  TESOURO_IPCA: "#ec4899",
-  POUPANCA: "#64748b",
-  OUTRO: "#94a3b8",
+  CDB: "#d4af37",
+  LCI: "#6b8e5a",
+  LCA: "#8c6d46",
+  LC: "#7a6c5d",
+  TESOURO_SELIC: "#4a5a6a",
+  TESOURO_PREFIXADO: "#9c3d3d",
+  TESOURO_IPCA: "#5c7a7a",
+  POUPANCA: "#8a8478",
+  OUTRO: "#b0a99c",
 };
 
 export const DEFAULT_RATE_SUFFIX: Record<IndexType, string> = {
