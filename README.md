@@ -2,6 +2,8 @@
 
 Aplicação web para controle de investimentos de renda fixa: **CDB, LCI, LCA, LC, Tesouro Direto (Selic, Prefixado, IPCA+) e Poupança**.
 
+📘 [Manual do usuário](./docs/MANUAL-DO-USUARIO.md) — como usar o painel, cadastrar investimentos e entender os cálculos de rendimento, IR e IOF.
+
 ## Funcionalidades
 
 - **Painel** com total investido, valor líquido estimado, rentabilidade e distribuição da carteira por tipo de investimento (gráfico de pizza).
