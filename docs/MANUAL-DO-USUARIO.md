@@ -10,13 +10,14 @@ Guia de uso do Investe Valor: o painel onde você registra seus investimentos de
 
 1. [Visão geral](#1-visão-geral)
 2. [Ativação](#2-ativação)
-3. [Segurança dos dados](#3-segurança-dos-dados)
-4. [Painel](#4-painel)
-5. [Investimentos](#5-investimentos)
-6. [Tipos e indexadores](#6-tipos-e-indexadores)
-7. [Como o cálculo funciona](#7-como-o-cálculo-funciona)
-8. [Configurações](#8-configurações)
-9. [Perguntas frequentes](#9-perguntas-frequentes)
+3. [Mantendo o app rodando](#3-mantendo-o-app-rodando)
+4. [Segurança dos dados](#4-segurança-dos-dados)
+5. [Painel](#5-painel)
+6. [Investimentos](#6-investimentos)
+7. [Tipos e indexadores](#7-tipos-e-indexadores)
+8. [Como o cálculo funciona](#8-como-o-cálculo-funciona)
+9. [Configurações](#9-configurações)
+10. [Perguntas frequentes](#10-perguntas-frequentes)
 
 ## 1. Visão geral
 
@@ -32,9 +33,45 @@ Na primeira vez que você abrir o Investe Valor, ele pede uma chave de licença 
 
 Cole no campo a chave que você recebeu na compra — uma string longa começando com `IV1.` — e clique em **Ativar**. A validação acontece localmente, sem precisar de internet, e a chave fica guardada na sua instalação: você só precisa ativar uma vez.
 
-Se a chave for inválida, estiver expirada, ou não tiver sido informada ainda, o app volta para essa tela e bloqueia o acesso ao Painel, Investimentos e Configurações. Depois de ativado, os dados da licença (nome, e-mail e validade) ficam visíveis na aba [Configurações](#8-configurações).
+Se a chave for inválida, estiver expirada, ou não tiver sido informada ainda, o app volta para essa tela e bloqueia o acesso ao Painel, Investimentos e Configurações. Depois de ativado, os dados da licença (nome, e-mail e validade) ficam visíveis na aba [Configurações](#9-configurações).
 
-## 3. Segurança dos dados
+## 3. Mantendo o app rodando
+
+O comando `npm run start` mantém o Investe Valor no ar enquanto a janela do terminal ficar aberta. Fechar essa janela, ou desligar o computador, derruba o servidor — nada é perdido (a ativação e os dados continuam salvos), mas é preciso rodar `npm run start` de novo antes de usar o app.
+
+### Uso ocasional
+
+Se você usa o app só de vez em quando, isso já é suficiente: abra o terminal, rode `npm run start`, acesse `http://localhost:3000` no navegador, e feche a janela do terminal quando terminar.
+
+### Uso contínuo (recomendado para uso diário)
+
+Para deixar o Investe Valor sempre disponível em segundo plano, sem precisar manter uma janela de terminal aberta, use o [pm2](https://pm2.keymetrics.io/), um gerenciador de processos gratuito:
+
+```bash
+npx pm2 start npm --name investe-valor -- start
+```
+
+Isso inicia o app em segundo plano. Comandos úteis:
+
+| Comando | O que faz |
+|---|---|
+| `npx pm2 status` | Mostra se o app está rodando |
+| `npx pm2 logs investe-valor` | Mostra o que está acontecendo (útil para diagnosticar problemas) |
+| `npx pm2 restart investe-valor` | Reinicia o app |
+| `npx pm2 stop investe-valor` | Para o app |
+
+Para o app voltar a rodar sozinho depois que o computador reiniciar:
+
+```bash
+npx pm2 startup
+npx pm2 save
+```
+
+O primeiro comando imprime uma instrução que varia conforme o sistema operacional — copie e rode exatamente o que ele mostrar na tela. O segundo comando salva a configuração atual para ser restaurada no próximo boot.
+
+> Isso é opcional. Sem o pm2, o app funciona normalmente — só exige manter o terminal aberto enquanto estiver em uso.
+
+## 4. Segurança dos dados
 
 O Investe Valor grava os campos sensíveis de cada investimento — **nome, instituição, taxa, valor investido e observações** — cifrados com **AES-256-GCM** antes de tocar o banco de dados. Quem tiver acesso direto ao arquivo do banco, sem a chave de criptografia, não consegue ler esses valores.
 
@@ -42,7 +79,7 @@ Ficam em texto plano apenas o tipo, o indexador, as datas de aplicação/vencime
 
 > A chave de criptografia (`ENCRYPTION_KEY`) é configurada por quem instala e roda a aplicação — veja as instruções no README do projeto. Guarde-a com cuidado: **sem ela, os dados já salvos ficam irrecuperáveis**; se ela vazar, quem a tiver consegue decifrar os dados.
 
-## 4. Painel
+## 5. Painel
 
 É a tela inicial. Ela resume a carteira inteira em quatro números e dois painéis de apoio.
 
@@ -55,7 +92,7 @@ Ficam em texto plano apenas o tipo, o indexador, as datas de aplicação/vencime
 
 O gráfico de **distribuição por tipo** agrupa o valor líquido estimado por categoria (CDB, LCI, LCA…), para você ver rapidamente onde a carteira está concentrada. A lista de **próximos vencimentos** mostra o que vence nos próximos 90 dias, ordenado por data.
 
-## 5. Investimentos
+## 6. Investimentos
 
 Aqui você cadastra, edita e remove cada aplicação. A tabela já mostra o valor estimado de cada linha, atualizado a cada visita.
 
@@ -89,7 +126,7 @@ Na tabela, use **Editar** para abrir o mesmo formulário já preenchido, ou **Ex
 |---|---|
 | ![Editar investimento](./screenshots/form-editar.png) | ![Confirmar exclusão](./screenshots/confirmar-exclusao.png) |
 
-## 6. Tipos e indexadores
+## 7. Tipos e indexadores
 
 O tipo escolhido determina, sobretudo, se o investimento paga Imposto de Renda.
 
@@ -111,7 +148,7 @@ O tipo escolhido determina, sobretudo, se o investimento paga Imposto de Renda.
 | IPCA + | Spread fixo somado à inflação projetada | `6,2` → IPCA + 6,2% a.a. |
 | Prefixado | Taxa anual fixa | `12,5` → 12,5% a.a. |
 
-## 7. Como o cálculo funciona
+## 8. Como o cálculo funciona
 
 O valor estimado de cada investimento é recalculado toda vez que você abre a tela, com base na data de hoje (ou na data de vencimento, se ela já tiver passado).
 
@@ -130,7 +167,7 @@ O valor estimado de cada investimento é recalculado toda vez que você abre a t
 
 > **Isto é uma estimativa.** O cálculo usa uma aproximação de dias úteis e as taxas de referência informadas em Configurações — confira sempre o extrato oficial da instituição antes de decidir um resgate.
 
-## 8. Configurações
+## 9. Configurações
 
 As três taxas de referência usadas em todos os cálculos ficam centralizadas aqui. Atualize-as sempre que o Copom mudar a Selic (o que arrasta o CDI junto) ou quando a projeção de inflação mudar.
 
@@ -138,7 +175,7 @@ As três taxas de referência usadas em todos os cálculos ficam centralizadas a
 
 Como o CDI normalmente fica pouco abaixo da Selic, uma atualização vale para toda a carteira de uma vez — não é preciso editar investimento por investimento.
 
-## 9. Perguntas frequentes
+## 10. Perguntas frequentes
 
 **Perdi minha chave de licença. E agora?**
 Fale com quem vendeu o Investe Valor para você — a chave pode ser reenviada a qualquer momento, já que ela não expira sozinha (a menos que tenha sido emitida com validade definida).
@@ -147,7 +184,7 @@ Fale com quem vendeu o Investe Valor para você — a chave pode ser reenviada a
 Sim. A ativação fica registrada apenas na instalação atual (arquivo `license.key`); reinstalar ou migrar para outra máquina exige colar a chave de novo na tela de ativação.
 
 **Os meus dados ficam salvos onde?**
-No banco de dados da própria aplicação, local ao ambiente onde ela está rodando. Nenhuma informação é enviada a bancos, corretoras ou terceiros, e os campos sensíveis ficam cifrados (veja [Segurança dos dados](#3-segurança-dos-dados)).
+No banco de dados da própria aplicação, local ao ambiente onde ela está rodando. Nenhuma informação é enviada a bancos, corretoras ou terceiros, e os campos sensíveis ficam cifrados (veja [Segurança dos dados](#4-segurança-dos-dados)).
 
 **O que acontece se eu perder a chave de criptografia?**
 Os investimentos já cadastrados ficam irrecuperáveis — a chave não fica salva em nenhum lugar recuperável por design. Guarde-a em um cofre de senhas ou local seguro, separado do banco de dados.
