@@ -1,6 +1,8 @@
-# Manual do Usuário — InvestControl
+![Investe Valor](../public/brand/investe-valor-logo.png)
 
-Guia de uso do InvestControl: o painel onde você registra seus investimentos de renda fixa — CDB, LCI, LCA, LC, Tesouro Direto e Poupança — e acompanha, em um só lugar, quanto cada um vale hoje.
+# Manual do Usuário — Investe Valor
+
+Guia de uso do Investe Valor: o painel onde você registra seus investimentos de renda fixa — CDB, LCI, LCA, LC, Tesouro Direto e Poupança — e acompanha, em um só lugar, quanto cada um vale hoje.
 
 > Este manual também está disponível em versão navegável, com capturas de tela maiores: veja o link publicado na conversa que gerou este documento, ou consulte as imagens em [`docs/screenshots/`](./screenshots).
 
@@ -23,7 +25,7 @@ Todo o cadastro fica salvo, de forma cifrada, no banco de dados local da aplica�
 
 ## 2. Segurança dos dados
 
-O InvestControl grava os campos sensíveis de cada investimento — **nome, instituição, taxa, valor investido e observações** — cifrados com **AES-256-GCM** antes de tocar o banco de dados. Quem tiver acesso direto ao arquivo do banco, sem a chave de criptografia, não consegue ler esses valores.
+O Investe Valor grava os campos sensíveis de cada investimento — **nome, instituição, taxa, valor investido e observações** — cifrados com **AES-256-GCM** antes de tocar o banco de dados. Quem tiver acesso direto ao arquivo do banco, sem a chave de criptografia, não consegue ler esses valores.
 
 Ficam em texto plano apenas o tipo, o indexador, as datas de aplicação/vencimento, a liquidez e a cobertura do FGC — usados para filtrar, ordenar e destacar vencimentos na tela, e de baixa sensibilidade isoladamente (sem o valor, saber que existe "um CDB com vencimento em outubro" não expõe muita coisa).
 
@@ -33,7 +35,7 @@ Ficam em texto plano apenas o tipo, o indexador, as datas de aplicação/vencime
 
 É a tela inicial. Ela resume a carteira inteira em quatro números e dois painéis de apoio.
 
-![Painel do InvestControl](./screenshots/painel.png)
+![Painel do Investe Valor](./screenshots/painel.png)
 
 - **Total investido** — soma do valor aplicado (principal) em todos os investimentos ativos.
 - **Valor líquido estimado** — quanto a carteira valeria hoje se todos os investimentos fossem resgatados agora, já descontando IR e IOF quando aplicáveis.
@@ -140,7 +142,7 @@ Porque o cálculo usa a data de hoje como referência — a cada dia que passa, 
 Sim. É o caso comum de Tesouro Selic e CDBs com liquidez diária — deixe o campo em branco.
 
 **O que acontece com o cálculo depois que o investimento vence?**
-O InvestControl trava o rendimento na data de vencimento — ele não continua rendendo indefinidamente depois de vencido.
+O Investe Valor trava o rendimento na data de vencimento — ele não continua rendendo indefinidamente depois de vencido.
 
 **Como sei se um investimento é isento de IR?**
 A tabela de investimentos mostra a etiqueta "Isento de IR" abaixo do tipo, sempre que o tipo cadastrado for LCI, LCA ou Poupança.
