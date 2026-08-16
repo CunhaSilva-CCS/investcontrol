@@ -1,4 +1,6 @@
-# InvestControl
+# Investe Valor
+
+![Investe Valor](./public/brand/investe-valor-logo.png)
 
 Aplicação web para controle de investimentos de renda fixa: **CDB, LCI, LCA, LC, Tesouro Direto (Selic, Prefixado, IPCA+) e Poupança**.
 

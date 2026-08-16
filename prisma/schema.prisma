@@ -1,4 +1,4 @@
-// Prisma schema for InvestControl — personal fixed-income investment tracker
+// Prisma schema for Investe Valor — personal fixed-income investment tracker
 
 generator client {
   provider = "prisma-client"

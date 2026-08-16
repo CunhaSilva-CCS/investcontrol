@@ -25,7 +25,7 @@ export default async function DashboardPage() {
   if (investments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center text-center py-24 gap-4">
-        <h1 className="text-2xl font-semibold">Bem-vindo ao InvestControl</h1>
+        <h1 className="text-2xl font-semibold">Bem-vindo ao Investe Valor</h1>
         <p className="text-muted max-w-md">
           Você ainda não cadastrou nenhum investimento. Comece adicionando seu primeiro CDB, LCI, LCA ou outro
           investimento de renda fixa.

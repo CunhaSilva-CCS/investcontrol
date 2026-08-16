@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { BrandMark } from "@/components/BrandMark";
 
 const LINKS = [
   { href: "/", label: "Painel" },
@@ -17,10 +18,10 @@ export function NavBar() {
     <header className="border-b border-border bg-surface sticky top-0 z-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-semibold text-lg">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">
-            IC
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <BrandMark className="h-5 w-5" />
           </span>
-          InvestControl
+          Investe Valor
         </Link>
         <nav className="flex items-center gap-1">
           {LINKS.map((link) => {
