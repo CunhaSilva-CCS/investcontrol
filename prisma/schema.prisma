@@ -1,0 +1,60 @@
+// Prisma schema for InvestControl — personal fixed-income investment tracker
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum InvestmentType {
+  CDB
+  LCI
+  LCA
+  LC
+  TESOURO_SELIC
+  TESOURO_PREFIXADO
+  TESOURO_IPCA
+  POUPANCA
+  OUTRO
+}
+
+enum IndexType {
+  CDI
+  IPCA
+  PREFIXADO
+  SELIC
+}
+
+enum Liquidity {
+  DIARIA
+  NO_VENCIMENTO
+}
+
+model Investment {
+  id             String         @id @default(cuid())
+  name           String
+  institution    String
+  type           InvestmentType
+  indexType      IndexType
+  rate           Float // for CDI/SELIC: % of the index (e.g. 105 = 105% CDI); for IPCA: spread added (e.g. 5.5 = IPCA + 5.5%); for PREFIXADO: annual fixed rate (e.g. 13.5)
+  principal      Float // initial amount invested (BRL)
+  applicationDate DateTime
+  maturityDate   DateTime?
+  liquidity      Liquidity      @default(NO_VENCIMENTO)
+  fgcCovered     Boolean        @default(true)
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+// Global app settings, e.g. current CDI/SELIC/IPCA rates used for projections
+model Settings {
+  id        String   @id @default("singleton")
+  cdiRate   Float    @default(10.65) // annual CDI rate, %
+  selicRate Float    @default(10.75) // annual SELIC rate, %
+  ipcaRate  Float    @default(4.5) // annual IPCA rate, %
+  updatedAt DateTime @updatedAt
+}
