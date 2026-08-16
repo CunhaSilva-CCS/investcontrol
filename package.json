@@ -53,6 +53,7 @@
     "npmRebuild": false,
     "asar": true,
     "publish": null,
+    "afterPack": "scripts/electron-after-pack.cjs",
     "files": [
       "electron/**/*",
       "build/icon.png",

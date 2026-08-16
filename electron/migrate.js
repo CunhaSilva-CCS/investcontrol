@@ -13,8 +13,10 @@ const path = require("node:path");
 
 // better-sqlite3 is a native addon and must match the Electron (not system Node) ABI it's
 // running under. scripts/copy-standalone-assets.mjs copies the actual (already Electron-rebuilt)
-// package here explicitly after the build — Next's own file tracer proved unreliable for this
-// specific native module, so this fixed path is the one guaranteed-correct source, not a guess.
+// package here explicitly after the build, and scripts/electron-after-pack.cjs moves it into
+// this standard location once electron-builder is done packaging (see the comments in both for
+// why it can't just live here from the start) — Next's own file tracer proved unreliable for
+// this specific native module, so this fixed path is the one guaranteed-correct source.
 function loadDatabase(standaloneDir) {
   return require(path.join(standaloneDir, "node_modules", "better-sqlite3"));
 }
