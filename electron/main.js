@@ -14,7 +14,7 @@ const path = require("node:path");
 const fs = require("node:fs");
 const http = require("node:http");
 const crypto = require("node:crypto");
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, dialog } = require("electron");
 const { ensureDatabase } = require("./migrate");
 
 const PORT = 17321;
@@ -52,6 +52,10 @@ async function start() {
     createWindow();
   } catch (err) {
     console.error("Falha ao iniciar o Investe Valor:", err);
+    dialog.showErrorBox(
+      "Não foi possível iniciar o Investe Valor",
+      `${err.message || err}\n\n${err.stack || ""}`.trim()
+    );
     app.quit();
   }
 }
