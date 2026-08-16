@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { settingsSchema } from "@/lib/validation";
+import { getLicenseOrNull, licenseErrorResponse } from "@/lib/license";
 
 async function getOrCreateSettings() {
   const existing = await prisma.settings.findUnique({ where: { id: "singleton" } });
@@ -9,11 +10,13 @@ async function getOrCreateSettings() {
 }
 
 export async function GET() {
+  if (!getLicenseOrNull()) return licenseErrorResponse();
   const settings = await getOrCreateSettings();
   return NextResponse.json(settings);
 }
 
 export async function PUT(request: Request) {
+  if (!getLicenseOrNull()) return licenseErrorResponse();
   const body = await request.json();
   const parsed = settingsSchema.safeParse(body);
 

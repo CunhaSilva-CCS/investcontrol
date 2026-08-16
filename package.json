@@ -2,14 +2,20 @@
   "name": "investcontrol",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
+    "setup": "node scripts/setup.mjs",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "license:keypair": "node scripts/generate-license-keypair.mjs",
+    "license:generate": "node scripts/generate-license.mjs"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.1",

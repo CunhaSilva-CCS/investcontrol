@@ -18,6 +18,7 @@ Aplicação web para controle de investimentos de renda fixa: **CDB, LCI, LCA, L
 - **Vencimentos próximos** (90 dias) em destaque no painel.
 - **Configurações** para atualizar as taxas atuais de CDI, Selic e IPCA usadas nas projeções.
 - **Criptografia em repouso** dos dados sensíveis de cada investimento (nome, instituição, taxa, valor investido e observações) com AES-256-GCM antes de gravar no banco.
+- **Licenciamento por chave** — o app só libera o uso depois de ativado com uma chave de licença assinada digitalmente (Ed25519), validada localmente sem precisar de internet.
 
 ## Stack
 
@@ -27,14 +28,30 @@ Aplicação web para controle de investimentos de renda fixa: **CDB, LCI, LCA, L
 - [Recharts](https://recharts.org/) para os gráficos
 - [Zod](https://zod.dev/) para validação
 
-## Como rodar localmente
+## Instalação (para quem vai usar)
+
+Requer [Node.js](https://nodejs.org/) 20 ou mais recente instalado. Depois de obter o código:
+
+```bash
+npm run setup    # cria o .env com uma chave de criptografia nova, instala tudo,
+                  # aplica as migrations do banco e gera o build de produção
+npm run start     # inicia o app em http://localhost:3000
+```
+
+Na primeira vez que abrir o app, ele vai pedir a **chave de licença** recebida na compra — cole-a na tela de ativação para liberar o uso. Veja o [manual do usuário](./docs/MANUAL-DO-USUARIO.md) para o passo a passo completo.
+
+`npm run setup` nunca sobrescreve um `.env` já existente — pode rodar de novo com segurança depois de atualizar o código, sem perder a chave de criptografia nem os dados.
+
+### Desenvolvimento
+
+Para trabalhar no código-fonte (não para uso normal do app):
 
 ```bash
 cp .env.example .env
 # gere uma chave e cole em ENCRYPTION_KEY dentro do .env:
 openssl rand -base64 32
 
-npm install          # instala dependências e gera o Prisma Client
+npm install           # instala dependências e gera o Prisma Client
 npm run db:migrate    # cria o banco SQLite local (dev.db) e aplica as migrations
 npm run dev            # inicia o servidor de desenvolvimento em http://localhost:3000
 ```
@@ -50,6 +67,29 @@ npm run lint       # lint
 npm run db:studio  # abre o Prisma Studio para inspecionar o banco
 ```
 
+## Licenciamento (para quem vende)
+
+O app só funciona depois de ativado com uma chave de licença. As chaves são assinadas com uma chave privada Ed25519 que **só quem vende** deve ter — o app embarca apenas a chave pública, usada para validar (não para criar) licenças, então essa verificação funciona sem internet.
+
+**1. Gere o par de chaves (uma vez só, no seu computador):**
+
+```bash
+npm run license:keypair
+```
+
+Isso cria `vendor/license-private-key.pem` (a chave privada) e atualiza `src/lib/license-public-key.ts` (a chave pública, que vai junto no código). O diretório `vendor/` já está no `.gitignore` — **nunca commite nem envie esse arquivo para clientes**. Guarde-o em um cofre de senhas ou backup seguro: se ele vazar, qualquer pessoa pode gerar licenças válidas; se for perdido, você não consegue mais emitir licenças novas (as já emitidas continuam válidas).
+
+**2. Gere uma licença para cada venda:**
+
+```bash
+npm run license:generate -- --customer "Nome do Cliente" --email cliente@exemplo.com
+# opcional: --expires 2027-12-31 (sem essa opção, a licença não expira)
+```
+
+O comando imprime a chave de licença (uma string longa começando com `IV1.`) — envie essa string ao cliente. Ela já contém o nome, e-mail e validade codificados e assinados; não é preciso guardar nada além da própria chave privada.
+
+**Importante:** quando for entregar o código para um cliente, **não inclua a pasta `vendor/`** (ela já é ignorada pelo git, então um `git clone`/`git archive` normal já a exclui automaticamente).
+
 ## Estrutura
 
 ```
@@ -57,7 +97,10 @@ prisma/schema.prisma         modelos: Investment, Settings
 src/lib/crypto.ts            criptografia AES-256-GCM (ENCRYPTION_KEY)
 src/lib/investments-repo.ts  único ponto de acesso a Investment; cifra/decifra na borda
 src/lib/investment-calc.ts   motor de cálculo (rendimento, IR, IOF)
-src/app/                     páginas: painel (/), investimentos, configurações
-src/app/api/                 rotas REST: /api/investments, /api/settings
+src/lib/license.ts           validação de chave de licença (Ed25519)
+src/app/                     páginas: painel (/), investimentos, configurações, ativação
+src/app/api/                 rotas REST: /api/investments, /api/settings, /api/license/activate
 src/components/              componentes de UI
+scripts/setup.mjs            instalação em um comando (npm run setup)
+scripts/generate-license*.mjs ferramentas do vendedor para emitir licenças
 ```
