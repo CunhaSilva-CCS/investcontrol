@@ -9,13 +9,14 @@ Guia de uso do Investe Valor: o painel onde você registra seus investimentos de
 ## Sumário
 
 1. [Visão geral](#1-visão-geral)
-2. [Segurança dos dados](#2-segurança-dos-dados)
-3. [Painel](#3-painel)
-4. [Investimentos](#4-investimentos)
-5. [Tipos e indexadores](#5-tipos-e-indexadores)
-6. [Como o cálculo funciona](#6-como-o-cálculo-funciona)
-7. [Configurações](#7-configurações)
-8. [Perguntas frequentes](#8-perguntas-frequentes)
+2. [Ativação](#2-ativação)
+3. [Segurança dos dados](#3-segurança-dos-dados)
+4. [Painel](#4-painel)
+5. [Investimentos](#5-investimentos)
+6. [Tipos e indexadores](#6-tipos-e-indexadores)
+7. [Como o cálculo funciona](#7-como-o-cálculo-funciona)
+8. [Configurações](#8-configurações)
+9. [Perguntas frequentes](#9-perguntas-frequentes)
 
 ## 1. Visão geral
 
@@ -23,7 +24,17 @@ Três telas resolvem o essencial: o **Painel**, onde você enxerga a carteira to
 
 Todo o cadastro fica salvo, de forma cifrada, no banco de dados local da aplicação — nada é enviado ao seu banco ou corretora. Os valores mostrados são **estimativas** calculadas a partir da taxa contratada e das taxas de referência que você informa; eles servem para acompanhamento e planejamento, não substituem o extrato oficial da instituição financeira.
 
-## 2. Segurança dos dados
+## 2. Ativação
+
+Na primeira vez que você abrir o Investe Valor, ele pede uma chave de licença antes de liberar qualquer tela.
+
+![Tela de ativação](./screenshots/ativacao.png)
+
+Cole no campo a chave que você recebeu na compra — uma string longa começando com `IV1.` — e clique em **Ativar**. A validação acontece localmente, sem precisar de internet, e a chave fica guardada na sua instalação: você só precisa ativar uma vez.
+
+Se a chave for inválida, estiver expirada, ou não tiver sido informada ainda, o app volta para essa tela e bloqueia o acesso ao Painel, Investimentos e Configurações. Depois de ativado, os dados da licença (nome, e-mail e validade) ficam visíveis na aba [Configurações](#8-configurações).
+
+## 3. Segurança dos dados
 
 O Investe Valor grava os campos sensíveis de cada investimento — **nome, instituição, taxa, valor investido e observações** — cifrados com **AES-256-GCM** antes de tocar o banco de dados. Quem tiver acesso direto ao arquivo do banco, sem a chave de criptografia, não consegue ler esses valores.
 
@@ -31,7 +42,7 @@ Ficam em texto plano apenas o tipo, o indexador, as datas de aplicação/vencime
 
 > A chave de criptografia (`ENCRYPTION_KEY`) é configurada por quem instala e roda a aplicação — veja as instruções no README do projeto. Guarde-a com cuidado: **sem ela, os dados já salvos ficam irrecuperáveis**; se ela vazar, quem a tiver consegue decifrar os dados.
 
-## 3. Painel
+## 4. Painel
 
 É a tela inicial. Ela resume a carteira inteira em quatro números e dois painéis de apoio.
 
@@ -44,7 +55,7 @@ Ficam em texto plano apenas o tipo, o indexador, as datas de aplicação/vencime
 
 O gráfico de **distribuição por tipo** agrupa o valor líquido estimado por categoria (CDB, LCI, LCA…), para você ver rapidamente onde a carteira está concentrada. A lista de **próximos vencimentos** mostra o que vence nos próximos 90 dias, ordenado por data.
 
-## 4. Investimentos
+## 5. Investimentos
 
 Aqui você cadastra, edita e remove cada aplicação. A tabela já mostra o valor estimado de cada linha, atualizado a cada visita.
 
@@ -78,7 +89,7 @@ Na tabela, use **Editar** para abrir o mesmo formulário já preenchido, ou **Ex
 |---|---|
 | ![Editar investimento](./screenshots/form-editar.png) | ![Confirmar exclusão](./screenshots/confirmar-exclusao.png) |
 
-## 5. Tipos e indexadores
+## 6. Tipos e indexadores
 
 O tipo escolhido determina, sobretudo, se o investimento paga Imposto de Renda.
 
@@ -100,7 +111,7 @@ O tipo escolhido determina, sobretudo, se o investimento paga Imposto de Renda.
 | IPCA + | Spread fixo somado à inflação projetada | `6,2` → IPCA + 6,2% a.a. |
 | Prefixado | Taxa anual fixa | `12,5` → 12,5% a.a. |
 
-## 6. Como o cálculo funciona
+## 7. Como o cálculo funciona
 
 O valor estimado de cada investimento é recalculado toda vez que você abre a tela, com base na data de hoje (ou na data de vencimento, se ela já tiver passado).
 
@@ -119,7 +130,7 @@ O valor estimado de cada investimento é recalculado toda vez que você abre a t
 
 > **Isto é uma estimativa.** O cálculo usa uma aproximação de dias úteis e as taxas de referência informadas em Configurações — confira sempre o extrato oficial da instituição antes de decidir um resgate.
 
-## 7. Configurações
+## 8. Configurações
 
 As três taxas de referência usadas em todos os cálculos ficam centralizadas aqui. Atualize-as sempre que o Copom mudar a Selic (o que arrasta o CDI junto) ou quando a projeção de inflação mudar.
 
@@ -127,10 +138,16 @@ As três taxas de referência usadas em todos os cálculos ficam centralizadas a
 
 Como o CDI normalmente fica pouco abaixo da Selic, uma atualização vale para toda a carteira de uma vez — não é preciso editar investimento por investimento.
 
-## 8. Perguntas frequentes
+## 9. Perguntas frequentes
+
+**Perdi minha chave de licença. E agora?**
+Fale com quem vendeu o Investe Valor para você — a chave pode ser reenviada a qualquer momento, já que ela não expira sozinha (a menos que tenha sido emitida com validade definida).
+
+**Preciso ativar de novo se eu reinstalar ou trocar de computador?**
+Sim. A ativação fica registrada apenas na instalação atual (arquivo `license.key`); reinstalar ou migrar para outra máquina exige colar a chave de novo na tela de ativação.
 
 **Os meus dados ficam salvos onde?**
-No banco de dados da própria aplicação, local ao ambiente onde ela está rodando. Nenhuma informação é enviada a bancos, corretoras ou terceiros, e os campos sensíveis ficam cifrados (veja [Segurança dos dados](#2-segurança-dos-dados)).
+No banco de dados da própria aplicação, local ao ambiente onde ela está rodando. Nenhuma informação é enviada a bancos, corretoras ou terceiros, e os campos sensíveis ficam cifrados (veja [Segurança dos dados](#3-segurança-dos-dados)).
 
 **O que acontece se eu perder a chave de criptografia?**
 Os investimentos já cadastrados ficam irrecuperáveis — a chave não fica salva em nenhum lugar recuperável por design. Guarde-a em um cofre de senhas ou local seguro, separado do banco de dados.

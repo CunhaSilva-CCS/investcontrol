@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { listInvestments } from "@/lib/investments-repo";
+import { requireLicense } from "@/lib/license";
 import { projectValue } from "@/lib/investment-calc";
 import { formatBRL, formatPercent } from "@/lib/investment-calc";
 import { INVESTMENT_TYPE_LABELS, TYPE_COLORS } from "@/lib/labels";
@@ -18,6 +19,7 @@ async function getSettings() {
 }
 
 export default async function DashboardPage() {
+  requireLicense();
   const [investments, settings] = await Promise.all([listInvestments(), getSettings()]);
 
   const now = new Date();

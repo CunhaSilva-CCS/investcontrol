@@ -11,7 +11,7 @@ const LINKS = [
   { href: "/configuracoes", label: "Configurações" },
 ];
 
-export function NavBar() {
+export function NavBar({ licensed = true }: { licensed?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -23,25 +23,27 @@ export function NavBar() {
           </span>
           Investe Valor
         </Link>
-        <nav className="flex items-center gap-1">
-          {LINKS.map((link) => {
-            const active = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={clsx(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted hover:text-foreground hover:bg-surface-muted"
-                )}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
+        {licensed && (
+          <nav className="flex items-center gap-1">
+            {LINKS.map((link) => {
+              const active = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={clsx(
+                    "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted hover:text-foreground hover:bg-surface-muted"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
       </div>
     </header>
   );
