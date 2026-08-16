@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { listInvestments } from "@/lib/investments-repo";
 import { serializeInvestment } from "@/lib/types";
 import { InvestmentsManager } from "@/components/InvestmentsManager";
 
@@ -6,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function InvestmentsPage() {
   const [investments, settings] = await Promise.all([
-    prisma.investment.findMany({ orderBy: { applicationDate: "desc" } }),
+    listInvestments(),
     prisma.settings.findUnique({ where: { id: "singleton" } }).then((s) => s ?? prisma.settings.create({ data: { id: "singleton" } })),
   ]);
   const dtos = investments.map(serializeInvestment);

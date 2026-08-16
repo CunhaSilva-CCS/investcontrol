@@ -15,6 +15,7 @@ Aplicação web para controle de investimentos de renda fixa: **CDB, LCI, LCA, L
   - **Isenção de IR** para LCI, LCA e Poupança.
 - **Vencimentos próximos** (90 dias) em destaque no painel.
 - **Configurações** para atualizar as taxas atuais de CDI, Selic e IPCA usadas nas projeções.
+- **Criptografia em repouso** dos dados sensíveis de cada investimento (nome, instituição, taxa, valor investido e observações) com AES-256-GCM antes de gravar no banco.
 
 ## Stack
 
@@ -27,10 +28,16 @@ Aplicação web para controle de investimentos de renda fixa: **CDB, LCI, LCA, L
 ## Como rodar localmente
 
 ```bash
+cp .env.example .env
+# gere uma chave e cole em ENCRYPTION_KEY dentro do .env:
+openssl rand -base64 32
+
 npm install          # instala dependências e gera o Prisma Client
 npm run db:migrate    # cria o banco SQLite local (dev.db) e aplica as migrations
 npm run dev            # inicia o servidor de desenvolvimento em http://localhost:3000
 ```
+
+`ENCRYPTION_KEY` é obrigatória — sem ela, qualquer leitura ou escrita de investimento falha. Trate-a como um segredo: se for perdida, os dados já criptografados no banco ficam irrecuperáveis; se vazar, alguém com acesso ao arquivo `dev.db` consegue decifrar os dados. Nunca a commite (o `.env` já está no `.gitignore`).
 
 Outros comandos úteis:
 
@@ -44,9 +51,11 @@ npm run db:studio  # abre o Prisma Studio para inspecionar o banco
 ## Estrutura
 
 ```
-prisma/schema.prisma        modelos: Investment, Settings
-src/lib/investment-calc.ts  motor de cálculo (rendimento, IR, IOF)
-src/app/                    páginas: painel (/), investimentos, configurações
-src/app/api/                rotas REST: /api/investments, /api/settings
-src/components/             componentes de UI
+prisma/schema.prisma         modelos: Investment, Settings
+src/lib/crypto.ts            criptografia AES-256-GCM (ENCRYPTION_KEY)
+src/lib/investments-repo.ts  único ponto de acesso a Investment; cifra/decifra na borda
+src/lib/investment-calc.ts   motor de cálculo (rendimento, IR, IOF)
+src/app/                     páginas: painel (/), investimentos, configurações
+src/app/api/                 rotas REST: /api/investments, /api/settings
+src/components/              componentes de UI
 ```
