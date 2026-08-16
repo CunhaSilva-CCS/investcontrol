@@ -2,6 +2,7 @@
   "name": "investcontrol",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "engines": {
     "node": ">=20"
   },
@@ -15,12 +16,15 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "license:keypair": "node scripts/generate-license-keypair.mjs",
-    "license:generate": "node scripts/generate-license.mjs"
+    "license:generate": "node scripts/generate-license.mjs",
+    "build:standalone": "next build && node scripts/copy-standalone-assets.mjs && npx electron-rebuild -f -w better-sqlite3 -m .next/standalone",
+    "dist:win": "npm run build:standalone && electron-builder --win",
+    "dist:mac": "npm run build:standalone && electron-builder --mac",
+    "dist:all": "npm run build:standalone && electron-builder --win --mac"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.1",
     "@prisma/client": "^7.9.1",
-    "better-sqlite3": "^13.0.3",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "next": "16.3.1",
@@ -30,14 +34,48 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.2.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
     "prisma": "^7.9.1",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "build": {
+    "appId": "com.investevalor.app",
+    "productName": "Investe Valor",
+    "npmRebuild": false,
+    "asar": true,
+    "files": [
+      "electron/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": ".next/standalone", "to": "standalone" },
+      { "from": "prisma/migrations", "to": "migrations" }
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.png",
+      "category": "public.app-category.finance"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
