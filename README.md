@@ -28,7 +28,28 @@ Aplicação web para controle de investimentos de renda fixa: **CDB, LCI, LCA, L
 - [Recharts](https://recharts.org/) para os gráficos
 - [Zod](https://zod.dev/) para validação
 
-## Instalação (para quem vai usar)
+## Instaladores para Windows e Mac (para quem vende)
+
+A forma mais simples de entregar o Investe Valor a um cliente é gerar um instalador de verdade — um `.exe` (Windows) ou `.dmg` (Mac) que ele baixa, instala e abre como qualquer programa, sem terminal e sem saber que existe Node.js por trás. O app roda dentro de um shell [Electron](https://www.electronjs.org/), que sobe o mesmo servidor Next.js localmente e abre uma janela apontando para ele.
+
+**Os instaladores são construídos no GitHub Actions**, não localmente — build de Mac (`.dmg`) só funciona de verdade numa máquina Mac real, e o workflow já cuida disso com runners `windows-latest` e `macos-latest` de verdade. Para gerar uma nova versão:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Isso dispara `.github/workflows/build-desktop.yml`, que builda os dois instaladores em paralelo e os deixa disponíveis como artefatos da execução (aba **Actions** do repositório → a execução do workflow → **Artifacts**, no fim da página). Também dá para disparar manualmente pela aba Actions (**Run workflow**), sem precisar criar uma tag, útil pra testar antes de lançar uma versão de verdade.
+
+Cada instalador já embarca o app inteiro (servidor Next.js, Prisma/SQLite, criptografia, tela de ativação) — o cliente só precisa da chave de licença de sempre (veja [Licenciamento](#licenciamento-para-quem-vende) abaixo).
+
+**Sobre os avisos de segurança:** os instaladores não são assinados digitalmente por enquanto (assinatura exige certificado pago — no Windows, um certificado de code-signing; no Mac, uma conta Apple Developer paga + notarização). Sem isso, o sistema operacional avisa:
+- **Windows**: SmartScreen mostra "Windows protegeu seu PC" — o cliente clica em **Mais informações** e depois **Executar assim mesmo**.
+- **Mac**: Gatekeeper recusa abrir de primeira ("desenvolvedor não identificado") — o cliente vai em **Ajustes do Sistema → Privacidade e Segurança**, encontra o aviso sobre o Investe Valor e clica em **Abrir Assim Mesmo**.
+
+Isso é normal para software não assinado e não afeta o funcionamento do app — só exige esse passo extra na primeira abertura.
+
+## Instalação via terminal (alternativa)
 
 Requer [Node.js](https://nodejs.org/) 20 ou mais recente instalado. Depois de obter o código:
 
@@ -101,6 +122,9 @@ src/lib/license.ts           validação de chave de licença (Ed25519)
 src/app/                     páginas: painel (/), investimentos, configurações, ativação
 src/app/api/                 rotas REST: /api/investments, /api/settings, /api/license/activate
 src/components/              componentes de UI
-scripts/setup.mjs            instalação em um comando (npm run setup)
+scripts/setup.mjs             instalação em um comando (npm run setup)
 scripts/generate-license*.mjs ferramentas do vendedor para emitir licenças
+electron/main.js               processo principal do app desktop (Electron)
+electron/migrate.js            cria o banco na primeira execução do app desktop
+.github/workflows/build-desktop.yml  builda os instaladores .exe/.dmg no CI
 ```

@@ -6,7 +6,10 @@ import { NextResponse } from "next/server";
 import { LICENSE_PUBLIC_KEY_PEM } from "@/lib/license-public-key";
 
 const LICENSE_KEY_PREFIX = "IV1";
-const LICENSE_FILE_PATH = path.join(process.cwd(), "license.key");
+// The Electron desktop build sets LICENSE_FILE_PATH to a writable per-user app-data
+// directory before starting the server (the packaged install directory may be read-only).
+// The CLI-based flow (npm run dev/start) never sets it, so it keeps resolving relative to cwd.
+const LICENSE_FILE_PATH = process.env.LICENSE_FILE_PATH ?? path.join(process.cwd(), "license.key");
 
 export type LicensePayload = {
   customer: string;
@@ -55,10 +58,12 @@ export function verifyLicenseKey(key: string): LicenseCheck {
 
 /** Reads and verifies the license key activated on this machine (license.key at the project root), if any. */
 export function readActivatedLicense(): LicenseCheck {
-  if (!existsSync(LICENSE_FILE_PATH)) {
+  // LICENSE_FILE_PATH resolves from an env var (Electron build) or a fixed cwd-relative
+  // path (CLI build) — never the whole project — but the tracer can't prove that statically.
+  if (!existsSync(/*turbopackIgnore: true*/ LICENSE_FILE_PATH)) {
     return { valid: false, reason: "Nenhuma licença ativada." };
   }
-  const key = readFileSync(LICENSE_FILE_PATH, "utf8");
+  const key = readFileSync(/*turbopackIgnore: true*/ LICENSE_FILE_PATH, "utf8");
   return verifyLicenseKey(key);
 }
 

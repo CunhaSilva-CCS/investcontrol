@@ -17,9 +17,6 @@
 /.next/
 /out/
 
-# production
-/build
-
 # misc
 .DS_Store
 *.pem
@@ -55,3 +52,6 @@ next-env.d.ts
 # licensing: private signing key and per-install activation state — never ship or commit these
 /vendor
 /license.key
+
+# electron-builder output (installers)
+/dist
