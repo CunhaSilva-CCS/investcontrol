@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
   // copy elsewhere in the tree (e.g. the prisma CLI's own devDependency) — so
   // include both the top-level and the adapter-nested location, whichever
   // ends up holding the real binary after `npm install`.
+  // This copies whatever .node file is on disk *right now* — for the Electron
+  // build, package.json's build:standalone script runs electron-rebuild before
+  // this, so the file this grabs is already rebuilt for Electron's ABI instead
+  // of plain Node's.
   outputFileTracingIncludes: {
     "/*": [
       "./node_modules/better-sqlite3/**/*.node",

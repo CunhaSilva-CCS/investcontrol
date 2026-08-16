@@ -12,17 +12,19 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 // better-sqlite3 is a native addon and must match the Electron (not system Node) ABI it's
-// running under. The copy inside the traced standalone bundle is the one rebuilt for Electron
-// (see the electron-rebuild step in package.json's build:standalone script). npm may nest a
-// separate better-sqlite3 copy under @prisma/adapter-better-sqlite3's own node_modules when it
-// conflicts with another version elsewhere in the tree — resolving through the adapter package,
-// the same way Prisma itself does, guarantees this loads the exact binding the running app uses
-// instead of guessing a top-level path that might hold an unrelated, unrebuilt copy.
+// running under. Next's file tracer bundles the adapter package's own JS straight into the
+// server chunk (it never ends up as a real package under standalone/node_modules), so it can't
+// be used as a resolution anchor — only the native binary gets copied out as a raw file, per the
+// outputFileTracingIncludes glob in next.config.ts. npm may nest a separate better-sqlite3 copy
+// under @prisma/adapter-better-sqlite3's own node_modules when it conflicts with another version
+// elsewhere in the tree, so that nested location is tried first, matching next.config.ts.
 function loadDatabase(standaloneDir) {
-  const adapterEntry = require.resolve("@prisma/adapter-better-sqlite3", {
-    paths: [path.join(standaloneDir, "node_modules")],
-  });
-  return require(require.resolve("better-sqlite3", { paths: [path.dirname(adapterEntry)] }));
+  const nodeModulesDir = path.join(standaloneDir, "node_modules");
+  const candidatePaths = [
+    path.join(nodeModulesDir, "@prisma", "adapter-better-sqlite3", "node_modules"),
+    nodeModulesDir,
+  ];
+  return require(require.resolve("better-sqlite3", { paths: candidatePaths }));
 }
 
 function ensureDatabase(dbPath, migrationsDir, standaloneDir) {
