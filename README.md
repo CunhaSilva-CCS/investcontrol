@@ -92,24 +92,21 @@ npm run db:studio  # abre o Prisma Studio para inspecionar o banco
 
 O app só funciona depois de ativado com uma chave de licença. As chaves são assinadas com uma chave privada Ed25519 que **só quem vende** deve ter — o app embarca apenas a chave pública, usada para validar (não para criar) licenças, então essa verificação funciona sem internet.
 
-**1. Gere o par de chaves (uma vez só, no seu computador):**
+Gerar o par de chaves e emitir licenças é feito por uma ferramenta separada deste repositório —
+**[`license-generator`](../license-generator)** — com interface gráfica própria (Electron), pensada
+para nunca conviver com o código que vai para o cliente. Veja o README dela para o passo a passo.
 
-```bash
-npm run license:keypair
-```
+Resumo do fluxo:
 
-Isso cria `vendor/license-private-key.pem` (a chave privada) e atualiza `src/lib/license-public-key.ts` (a chave pública, que vai junto no código). O diretório `vendor/` já está no `.gitignore` — **nunca commite nem envie esse arquivo para clientes**. Guarde-o em um cofre de senhas ou backup seguro: se ele vazar, qualquer pessoa pode gerar licenças válidas; se for perdido, você não consegue mais emitir licenças novas (as já emitidas continuam válidas).
-
-**2. Gere uma licença para cada venda:**
-
-```bash
-npm run license:generate -- --customer "Nome do Cliente" --email cliente@exemplo.com
-# opcional: --expires 2027-12-31 (sem essa opção, a licença não expira)
-```
-
-O comando imprime a chave de licença (uma string longa começando com `IV1.`) — envie essa string ao cliente. Ela já contém o nome, e-mail e validade codificados e assinados; não é preciso guardar nada além da própria chave privada.
-
-**Importante:** quando for entregar o código para um cliente, **não inclua a pasta `vendor/`** (ela já é ignorada pelo git, então um `git clone`/`git archive` normal já a exclui automaticamente).
+1. Na ferramenta, gere um novo par de chaves (ou selecione um `.pem` já existente) — a chave
+   privada é salva onde você escolher, fora deste repositório, e nunca fica dentro dele. Guarde-a
+   em um cofre de senhas: se ela vazar, qualquer pessoa pode gerar licenças válidas; se for
+   perdida, você não consegue mais emitir licenças novas (as já emitidas continuam válidas).
+2. Cole em `src/lib/license-public-key.ts` o trecho de chave pública que a ferramenta gera —
+   é seguro versionar, só permite *verificar* licenças, não criar novas.
+3. Para cada venda, preencha nome/e-mail/validade na ferramenta e copie a chave de licença gerada
+   (uma string longa começando com `IV1.`) — envie essa string ao cliente. Ela já contém os dados
+   codificados e assinados; não é preciso guardar nada além da própria chave privada.
 
 ## Estrutura
 
@@ -123,7 +120,6 @@ src/app/                     páginas: painel (/), investimentos, configuraçõe
 src/app/api/                 rotas REST: /api/investments, /api/settings, /api/license/activate
 src/components/              componentes de UI
 scripts/setup.mjs             instalação em um comando (npm run setup)
-scripts/generate-license*.mjs ferramentas do vendedor para emitir licenças
 electron/main.js               processo principal do app desktop (Electron)
 electron/migrate.js            cria o banco na primeira execução do app desktop
 .github/workflows/build-desktop.yml  builda os instaladores .exe/.dmg no CI

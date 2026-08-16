@@ -15,8 +15,6 @@
     "setup": "node scripts/setup.mjs",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "license:keypair": "node scripts/generate-license-keypair.mjs",
-    "license:generate": "node scripts/generate-license.mjs",
     "build:standalone": "npx electron-rebuild -f -w better-sqlite3 && next build && node scripts/copy-standalone-assets.mjs",
     "dist:win": "npm run build:standalone && electron-builder --win",
     "dist:mac": "npm run build:standalone && electron-builder --mac",
