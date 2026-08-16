@@ -1,4 +1,5 @@
-import type { Investment, Settings } from "@/generated/prisma/client";
+import type { Settings } from "@/generated/prisma/client";
+import type { Investment } from "@/lib/investments-repo";
 
 export type InvestmentDTO = Omit<Investment, "applicationDate" | "maturityDate" | "createdAt" | "updatedAt"> & {
   applicationDate: string;

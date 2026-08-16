@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { listInvestments, createInvestment } from "@/lib/investments-repo";
 import { investmentSchema } from "@/lib/validation";
 
 export async function GET() {
-  const investments = await prisma.investment.findMany({
-    orderBy: { applicationDate: "desc" },
-  });
+  const investments = await listInvestments();
   return NextResponse.json(investments);
 }
 
@@ -17,6 +15,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const investment = await prisma.investment.create({ data: parsed.data });
+  const investment = await createInvestment(parsed.data);
   return NextResponse.json(investment, { status: 201 });
 }

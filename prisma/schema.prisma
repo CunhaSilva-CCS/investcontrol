@@ -33,19 +33,21 @@ enum Liquidity {
   NO_VENCIMENTO
 }
 
+// name, institution, rate, principal and notes hold AES-256-GCM ciphertext (see src/lib/crypto.ts
+// and src/lib/investments-repo.ts) — never read or write them directly through `prisma.investment`.
 model Investment {
   id             String         @id @default(cuid())
-  name           String
-  institution    String
+  name           String // encrypted
+  institution    String // encrypted
   type           InvestmentType
   indexType      IndexType
-  rate           Float // for CDI/SELIC: % of the index (e.g. 105 = 105% CDI); for IPCA: spread added (e.g. 5.5 = IPCA + 5.5%); for PREFIXADO: annual fixed rate (e.g. 13.5)
-  principal      Float // initial amount invested (BRL)
+  rate           String // encrypted; decrypts to a Float — % of index, IPCA spread, or fixed annual rate depending on indexType
+  principal      String // encrypted; decrypts to a Float — initial amount invested (BRL)
   applicationDate DateTime
   maturityDate   DateTime?
   liquidity      Liquidity      @default(NO_VENCIMENTO)
   fgcCovered     Boolean        @default(true)
-  notes          String?
+  notes          String? // encrypted
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }
