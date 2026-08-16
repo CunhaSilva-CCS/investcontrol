@@ -52,6 +52,7 @@
     "productName": "Investe Valor",
     "npmRebuild": false,
     "asar": true,
+    "publish": null,
     "files": [
       "electron/**/*",
       "build/icon.png",
