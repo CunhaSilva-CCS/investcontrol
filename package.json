@@ -18,9 +18,9 @@
     "license:keypair": "node scripts/generate-license-keypair.mjs",
     "license:generate": "node scripts/generate-license.mjs",
     "build:standalone": "next build && node scripts/copy-standalone-assets.mjs && npx electron-rebuild -f -w better-sqlite3 -m .next/standalone",
-    "dist:win": "npm run build:standalone && electron-builder --win",
-    "dist:mac": "npm run build:standalone && electron-builder --mac",
-    "dist:all": "npm run build:standalone && electron-builder --win --mac"
+    "dist:win": "npm run build:standalone && electron-builder --win --publish never",
+    "dist:mac": "npm run build:standalone && electron-builder --mac --publish never",
+    "dist:all": "npm run build:standalone && electron-builder --win --mac --publish never"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.1",
