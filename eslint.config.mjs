@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Electron main process: plain CommonJS Node, not part of the Next.js TS app.
     "electron/**",
+    // electron-builder afterPack hook: also plain CommonJS Node, runs only during packaging.
+    "scripts/electron-after-pack.cjs",
   ]),
 ]);
 
