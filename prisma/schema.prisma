@@ -33,6 +33,12 @@ enum Liquidity {
   NO_VENCIMENTO
 }
 
+enum Currency {
+  BRL
+  USD
+  EUR
+}
+
 // name, institution, rate, principal and notes hold AES-256-GCM ciphertext (see src/lib/crypto.ts
 // and src/lib/investments-repo.ts) — never read or write them directly through `prisma.investment`.
 model Investment {
@@ -40,6 +46,7 @@ model Investment {
   name           String // encrypted
   institution    String // encrypted
   type           InvestmentType
+  currency       Currency       @default(BRL)
   indexType      IndexType
   rate           String // encrypted; decrypts to a Float — % of index, IPCA spread, or fixed annual rate depending on indexType
   principal      String // encrypted; decrypts to a Float — initial amount invested (BRL)
@@ -50,6 +57,7 @@ model Investment {
   notes          String? // encrypted
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+  movements      InvestmentMovement[]
 }
 
 // Global app settings, e.g. current CDI/SELIC/IPCA rates used for projections
@@ -58,5 +66,42 @@ model Settings {
   cdiRate   Float    @default(10.65) // annual CDI rate, %
   selicRate Float    @default(10.75) // annual SELIC rate, %
   ipcaRate  Float    @default(4.5) // annual IPCA rate, %
+  usdToBrl  Float    @default(5.5)
+  eurToBrl  Float    @default(6.2)
   updatedAt DateTime @updatedAt
+}
+
+model PortfolioEntry {
+  id          String   @id @default(cuid())
+  year        Int
+  month       Int
+  institution String
+  category    String
+  currency    Currency @default(BRL)
+  value       Float    @default(0)
+  contributions Float  @default(0)
+  withdrawals   Float  @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([year, month, institution, category])
+  @@index([year, institution, category])
+}
+
+enum MovementType {
+  APORTE
+  RETIRADA
+}
+
+model InvestmentMovement {
+  id           String       @id @default(cuid())
+  investmentId String
+  type         MovementType
+  amount       String // encrypted BRL amount
+  date         DateTime
+  notes        String? // encrypted
+  createdAt    DateTime     @default(now())
+  investment   Investment   @relation(fields: [investmentId], references: [id], onDelete: Cascade)
+
+  @@index([investmentId, date])
 }

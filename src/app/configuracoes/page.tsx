@@ -16,7 +16,7 @@ export default async function SettingsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Configurações</h1>
         <p className="text-sm text-muted mt-1">
-          Defina as taxas atuais usadas para projetar o valor dos seus investimentos indexados.
+          Defina as taxas de projeção e os fatores de conversão usados no Dashboard do Patrimônio.
         </p>
       </div>
       <SettingsForm
@@ -24,6 +24,8 @@ export default async function SettingsPage() {
           cdiRate: settings.cdiRate,
           selicRate: settings.selicRate,
           ipcaRate: settings.ipcaRate,
+          usdToBrl: settings.usdToBrl,
+          eurToBrl: settings.eurToBrl,
         }}
       />
 

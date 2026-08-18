@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/Button";
-import { projectValue, formatBRL, isTaxExempt, type RatesSettings } from "@/lib/investment-calc";
+import { projectValue, formatCurrency, toBRL, isTaxExempt, type RatesSettings } from "@/lib/investment-calc";
 import { INVESTMENT_TYPE_LABELS, formatRate } from "@/lib/labels";
 import type { InvestmentDTO } from "@/lib/types";
 
@@ -50,6 +50,7 @@ export function InvestmentsTable({
                 indexType: inv.indexType,
                 rate: inv.rate,
                 principal: inv.principal,
+                currency: inv.currency,
                 applicationDate: new Date(inv.applicationDate),
                 maturityDate: inv.maturityDate ? new Date(inv.maturityDate) : null,
               },
@@ -69,13 +70,14 @@ export function InvestmentsTable({
                   {exempt && <p className="text-xs text-success">Isento de IR</p>}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">{formatRate(inv.indexType, inv.rate)}</td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">{formatBRL(inv.principal)}</td>
+                <td className="px-4 py-3 text-right whitespace-nowrap"><p>{formatCurrency(inv.principal, inv.currency)}</p><p className="text-xs text-muted">{formatCurrency(toBRL(inv.principal, inv.currency, rates), "BRL")}</p></td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
-                  <p className="font-medium">{formatBRL(proj.netValue)}</p>
+                  <p className="font-medium">{formatCurrency(proj.netValue, inv.currency)}</p>
                   <p className={`text-xs ${proj.netGain >= 0 ? "text-success" : "text-danger"}`}>
                     {proj.netGain >= 0 ? "+" : ""}
-                    {formatBRL(proj.netGain)}
+                    {formatCurrency(proj.netGain, inv.currency)}
                   </p>
+                  <p className="text-xs text-muted">{formatCurrency(toBRL(proj.netValue, inv.currency, rates), "BRL")}</p>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   {inv.maturityDate ? format(new Date(inv.maturityDate), "dd/MM/yyyy", { locale: ptBR }) : "—"}

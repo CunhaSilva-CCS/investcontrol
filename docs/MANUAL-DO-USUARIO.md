@@ -2,7 +2,7 @@
 
 # Manual do Usuário — Investe Valor
 
-Guia de uso do Investe Valor: o painel onde você registra seus investimentos de renda fixa — CDB, LCI, LCA, LC, Tesouro Direto e Poupança — e acompanha, em um só lugar, quanto cada um vale hoje.
+Guia de uso do Investe Valor: o painel onde você registra seus investimentos e faz seu controle financeiro — CDB, LCI, LCA, LC, Tesouro Direto e Poupança — acompanhando, em um só lugar, quanto cada um vale hoje.
 
 > Este manual também está disponível em versão navegável, com capturas de tela maiores: veja o link publicado na conversa que gerou este documento, ou consulte as imagens em [`docs/screenshots/`](./screenshots).
 

@@ -29,6 +29,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
+    "xlsx": "^0.18.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -58,8 +59,14 @@
       "package.json"
     ],
     "extraResources": [
-      { "from": ".next/standalone", "to": "standalone" },
-      { "from": "prisma/migrations", "to": "migrations" }
+      {
+        "from": ".next/standalone",
+        "to": "standalone"
+      },
+      {
+        "from": "prisma/migrations",
+        "to": "migrations"
+      }
     ],
     "directories": {
       "output": "dist"

@@ -1,9 +1,11 @@
-import type { IndexType, InvestmentType } from "@/generated/prisma/client";
+import type { Currency, IndexType, InvestmentType } from "@/generated/prisma/client";
 
 export type RatesSettings = {
   cdiRate: number;
   selicRate: number;
   ipcaRate: number;
+  usdToBrl: number;
+  eurToBrl: number;
 };
 
 export type InvestmentLike = {
@@ -11,6 +13,7 @@ export type InvestmentLike = {
   indexType: IndexType;
   rate: number;
   principal: number;
+  currency: Currency;
   applicationDate: Date;
   maturityDate: Date | null;
 };
@@ -92,12 +95,12 @@ export function projectValue(inv: InvestmentLike, rates: RatesSettings, asOfDate
   const daysHeld = calendarDaysBetween(inv.applicationDate, effectiveEnd);
   const factor = grossFactor(inv, rates, asOfDate);
   const grossValue = inv.principal * factor;
-  const grossGain = Math.max(0, grossValue - inv.principal);
+  const grossGain = grossValue - inv.principal;
 
-  const iof = grossGain * iofRate(daysHeld);
+  const iof = Math.max(0, grossGain) * iofRate(daysHeld);
   const gainAfterIof = grossGain - iof;
-  const ir = isTaxExempt(inv.type) ? 0 : gainAfterIof * irRate(daysHeld);
-  const netValue = inv.principal + gainAfterIof - ir;
+  const ir = isTaxExempt(inv.type) ? 0 : Math.max(0, gainAfterIof) * irRate(daysHeld);
+  const netValue = Math.max(0, inv.principal + gainAfterIof - ir);
 
   return {
     daysHeld,
@@ -113,6 +116,16 @@ export function projectValue(inv: InvestmentLike, rates: RatesSettings, asOfDate
 
 export function formatBRL(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+export function formatCurrency(value: number, currency: Currency): string {
+  return value.toLocaleString("pt-BR", { style: "currency", currency });
+}
+
+export function toBRL(value: number, currency: Currency, rates: RatesSettings): number {
+  if (currency === "USD") return value * rates.usdToBrl;
+  if (currency === "EUR") return value * rates.eurToBrl;
+  return value;
 }
 
 export function formatPercent(value: number, digits = 2): string {

@@ -2,7 +2,7 @@
 
 ![Investe Valor](./public/brand/investe-valor-logo.png)
 
-Aplicação web para controle de investimentos de renda fixa: **CDB, LCI, LCA, LC, Tesouro Direto (Selic, Prefixado, IPCA+) e Poupança**.
+Aplicação web para controle financeiro e acompanhamento de investimentos: **CDB, LCI, LCA, LC, Tesouro Direto (Selic, Prefixado, IPCA+) e Poupança**.
 
 📘 [Manual do usuário](./docs/MANUAL-DO-USUARIO.md) — como usar o painel, cadastrar investimentos e entender os cálculos de rendimento, IR e IOF.
 

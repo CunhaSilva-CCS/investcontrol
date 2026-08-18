@@ -26,7 +26,9 @@
   --color-success: var(--success);
   --color-danger: var(--danger);
   --color-warning: var(--warning);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -51,6 +53,48 @@ body {
   font-family: var(--font-sans);
 }
 
+::selection {
+  background: color-mix(in srgb, var(--primary) 28%, transparent);
+  color: var(--foreground);
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  transition-duration: 160ms;
+}
+
 * {
   border-color: var(--border);
+}
+
+table[class*="min-w-[1900px]"] {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+table[class*="min-w-[1900px]"] thead th {
+  background: var(--surface-muted);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+table[class*="min-w-[1900px]"] thead tr:first-child th:nth-child(3) {
+  font-size: 0;
+}
+
+table[class*="min-w-[1900px]"] thead tr:first-child th:nth-child(3)::after {
+  content: "Saldo do ano anterior";
+  font-size: 0.75rem;
+}
+
+table[class*="min-w-[1900px]"] tbody tr:hover {
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+
+.portfolio-action-card {
+  border-color: color-mix(in srgb, var(--primary) 28%, var(--border));
 }

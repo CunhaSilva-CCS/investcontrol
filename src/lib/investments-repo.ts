@@ -28,11 +28,20 @@ function decryptRow(row: EncryptedInvestment): Investment {
   };
 }
 
+function applyMovements(investment: Investment, movements: Array<{ type: "APORTE" | "RETIRADA"; amount: string }>): Investment {
+  const netMovement = movements.reduce((total, movement) => {
+    const amount = Number(decrypt(movement.amount));
+    return total + (movement.type === "APORTE" ? amount : -amount);
+  }, 0);
+  return { ...investment, principal: Math.max(0, investment.principal + netMovement) };
+}
+
 function encryptInput(data: InvestmentInput) {
   return {
     name: encrypt(data.name),
     institution: encrypt(data.institution),
     type: data.type,
+    currency: data.currency,
     indexType: data.indexType,
     rate: encrypt(String(data.rate)),
     principal: encrypt(String(data.principal)),
@@ -45,13 +54,13 @@ function encryptInput(data: InvestmentInput) {
 }
 
 export async function listInvestments(): Promise<Investment[]> {
-  const rows = await prisma.investment.findMany({ orderBy: { applicationDate: "desc" } });
-  return rows.map(decryptRow);
+  const rows = await prisma.investment.findMany({ include: { movements: { select: { type: true, amount: true } } }, orderBy: { applicationDate: "desc" } });
+  return rows.map((row) => applyMovements(decryptRow(row), row.movements));
 }
 
 export async function getInvestment(id: string): Promise<Investment | null> {
-  const row = await prisma.investment.findUnique({ where: { id } });
-  return row ? decryptRow(row) : null;
+  const row = await prisma.investment.findUnique({ where: { id }, include: { movements: { select: { type: true, amount: true } } } });
+  return row ? applyMovements(decryptRow(row), row.movements) : null;
 }
 
 export async function createInvestment(data: InvestmentInput): Promise<Investment> {
@@ -76,3 +85,4 @@ export async function deleteInvestment(id: string): Promise<boolean> {
     return false;
   }
 }
+

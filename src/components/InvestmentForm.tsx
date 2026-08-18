@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Label, Input, Select } from "@/components/ui/Field";
 import type { InvestmentDTO } from "@/lib/types";
-import type { IndexType, InvestmentType, Liquidity } from "@/generated/prisma/client";
+import type { Currency, IndexType, InvestmentType, Liquidity } from "@/generated/prisma/client";
 import { INDEX_TYPE_LABELS, INVESTMENT_TYPE_LABELS, LIQUIDITY_LABELS, DEFAULT_RATE_SUFFIX } from "@/lib/labels";
 
 const DEFAULT_INDEX_BY_TYPE: Record<InvestmentType, IndexType> = {
@@ -36,6 +36,7 @@ export function InvestmentForm({
   const [name, setName] = useState(investment?.name ?? "");
   const [institution, setInstitution] = useState(investment?.institution ?? "");
   const [type, setType] = useState<InvestmentType>(investment?.type ?? "CDB");
+  const [currency, setCurrency] = useState<Currency>(investment?.currency ?? "BRL");
   const [indexType, setIndexType] = useState<IndexType>(investment?.indexType ?? "CDI");
   const [rate, setRate] = useState(investment ? String(investment.rate) : "100");
   const [principal, setPrincipal] = useState(investment ? String(investment.principal) : "");
@@ -66,6 +67,7 @@ export function InvestmentForm({
       name,
       institution,
       type,
+      currency,
       indexType,
       rate: Number(rate),
       principal: Number(principal),
@@ -130,6 +132,14 @@ export function InvestmentForm({
             ))}
           </Select>
         </div>
+        <div>
+          <Label htmlFor="currency">Moeda</Label>
+          <Select id="currency" value={currency} onChange={(e) => setCurrency(e.target.value as Currency)}>
+            <option value="BRL">Real (BRL)</option>
+            <option value="USD">Dólar (USD)</option>
+            <option value="EUR">Euro (EUR)</option>
+          </Select>
+        </div>
 
         <div>
           <Label htmlFor="rate">Taxa ({DEFAULT_RATE_SUFFIX[indexType]})</Label>
@@ -144,7 +154,7 @@ export function InvestmentForm({
           />
         </div>
         <div>
-          <Label htmlFor="principal">Valor investido (R$)</Label>
+            <Label htmlFor="principal">Valor investido em {currency}</Label>
           <Input
             id="principal"
             type="number"
@@ -152,8 +162,10 @@ export function InvestmentForm({
             min="0"
             required
             value={principal}
+            placeholder={`0,00 ${currency}`}
             onChange={(e) => setPrincipal(e.target.value)}
           />
+          <p className="text-[11px] text-muted mt-1">Informe o valor na moeda selecionada acima.</p>
         </div>
 
         <div>

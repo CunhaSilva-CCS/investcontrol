@@ -12,6 +12,8 @@ export function SettingsForm({ settings }: { settings: RatesSettings }) {
   const [cdiRate, setCdiRate] = useState(String(settings.cdiRate));
   const [selicRate, setSelicRate] = useState(String(settings.selicRate));
   const [ipcaRate, setIpcaRate] = useState(String(settings.ipcaRate));
+  const [usdToBrl, setUsdToBrl] = useState(String(settings.usdToBrl));
+  const [eurToBrl, setEurToBrl] = useState(String(settings.eurToBrl));
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +31,8 @@ export function SettingsForm({ settings }: { settings: RatesSettings }) {
           cdiRate: Number(cdiRate),
           selicRate: Number(selicRate),
           ipcaRate: Number(ipcaRate),
+          usdToBrl: Number(usdToBrl),
+          eurToBrl: Number(eurToBrl),
         }),
       });
       if (!res.ok) throw new Error("Não foi possível salvar as configurações.");
@@ -56,6 +60,20 @@ export function SettingsForm({ settings }: { settings: RatesSettings }) {
           <div>
             <Label htmlFor="ipcaRate">IPCA projetado (% a.a.)</Label>
             <Input id="ipcaRate" type="number" step="0.01" min="0" required value={ipcaRate} onChange={(e) => setIpcaRate(e.target.value)} />
+          </div>
+          <div className="border-t border-border pt-4 mt-1">
+            <p className="text-sm font-semibold">Fatores de conversão</p>
+            <p className="text-xs text-muted mt-1 mb-3">O Dashboard usa estes fatores para converter USD e EUR para BRL.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="usdToBrl">1 USD vale (BRL)</Label>
+                <Input id="usdToBrl" type="number" step="0.0001" min="0.0001" required value={usdToBrl} onChange={(e) => setUsdToBrl(e.target.value)} placeholder="Ex.: 5,50" />
+              </div>
+              <div>
+                <Label htmlFor="eurToBrl">1 EUR vale (BRL)</Label>
+                <Input id="eurToBrl" type="number" step="0.0001" min="0.0001" required value={eurToBrl} onChange={(e) => setEurToBrl(e.target.value)} placeholder="Ex.: 6,20" />
+              </div>
+            </div>
           </div>
 
           {message && <p className="text-sm text-success">{message}</p>}
