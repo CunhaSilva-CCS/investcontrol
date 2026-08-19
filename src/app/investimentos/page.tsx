@@ -2,12 +2,14 @@ import { prisma } from "@/lib/prisma";
 import { listInvestments } from "@/lib/investments-repo";
 import { serializeInvestment } from "@/lib/types";
 import { requireLicense } from "@/lib/license";
+import { requireUser } from "@/lib/auth";
 import { InvestmentsManager } from "@/components/InvestmentsManager";
 
 export const dynamic = "force-dynamic";
 
 export default async function InvestmentsPage() {
   requireLicense();
+  await requireUser();
   const [investments, settings] = await Promise.all([
     listInvestments(),
     prisma.settings.findUnique({ where: { id: "singleton" } }).then((s) => s ?? prisma.settings.create({ data: { id: "singleton" } })),

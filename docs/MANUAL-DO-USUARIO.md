@@ -14,14 +14,16 @@ Guia de uso do Investe Valor: o painel onde você registra seus investimentos e 
 4. [Segurança dos dados](#4-segurança-dos-dados)
 5. [Painel](#5-painel)
 6. [Investimentos](#6-investimentos)
-7. [Tipos e indexadores](#7-tipos-e-indexadores)
-8. [Como o cálculo funciona](#8-como-o-cálculo-funciona)
-9. [Configurações](#9-configurações)
-10. [Perguntas frequentes](#10-perguntas-frequentes)
+7. [Patrimônio](#7-patrimônio)
+8. [Dashboard do Patrimônio](#8-dashboard-do-patrimônio)
+9. [Tipos e indexadores](#9-tipos-e-indexadores)
+10. [Como o cálculo funciona](#10-como-o-cálculo-funciona)
+11. [Configurações](#11-configurações)
+12. [Perguntas frequentes](#12-perguntas-frequentes)
 
 ## 1. Visão geral
 
-Três telas resolvem o essencial: o **Painel**, onde você enxerga a carteira toda; **Investimentos**, onde você cadastra e edita cada aplicação; e **Configurações**, onde ficam as taxas de referência (CDI, Selic, IPCA) usadas nos cálculos.
+O sistema possui quatro áreas principais: **Painel**, que resume os investimentos cadastrados; **Investimentos**, para cadastrar aplicações individuais; **Patrimônio**, para lançar valores mensais, aportes e retiradas; e **Dashboard do Patrimônio**, para analisar a evolução consolidada. Em **Configurações**, ficam as taxas de referência e os fatores de conversão de moedas.
 
 Todo o cadastro fica salvo, de forma cifrada, no banco de dados local da aplicação — nada é enviado ao seu banco ou corretora. Os valores mostrados são **estimativas** calculadas a partir da taxa contratada e das taxas de referência que você informa; eles servem para acompanhamento e planejamento, não substituem o extrato oficial da instituição financeira.
 
@@ -33,7 +35,7 @@ Na primeira vez que você abrir o Investe Valor, ele pede uma chave de licença 
 
 Cole no campo a chave que você recebeu na compra — uma string longa começando com `IV1.` — e clique em **Ativar**. A validação acontece localmente, sem precisar de internet, e a chave fica guardada na sua instalação: você só precisa ativar uma vez.
 
-Se a chave for inválida, estiver expirada, ou não tiver sido informada ainda, o app volta para essa tela e bloqueia o acesso ao Painel, Investimentos e Configurações. Depois de ativado, os dados da licença (nome, e-mail e validade) ficam visíveis na aba [Configurações](#9-configurações).
+Se a chave for inválida, estiver expirada, ou não tiver sido informada ainda, o app volta para essa tela e bloqueia o acesso ao Painel, Investimentos, Patrimônio e Configurações. Depois de ativado, os dados da licença (nome, e-mail e validade) ficam visíveis na aba [Configurações](#11-configurações).
 
 ## 3. Mantendo o app rodando
 
@@ -111,7 +113,8 @@ Clique em **+ Novo investimento** e preencha o formulário. Ao escolher o **Tipo
 | Tipo | CDB, LCI, LCA, LC, Tesouro Selic, Tesouro Prefixado, Tesouro IPCA+, Poupança ou Outro. Define se há isenção de IR. |
 | Indexador | % do CDI, % da Selic, IPCA + spread fixo, ou taxa Prefixada. |
 | Taxa | O número contratado, no formato do indexador — ex: `105` para 105% do CDI, `6,2` para IPCA + 6,2% a.a. |
-| Valor investido | O principal aplicado, em reais. |
+| Valor investido | O principal aplicado na moeda escolhida: BRL, USD ou EUR. |
+| Moeda | Moeda do valor informado: Real (BRL), Dólar (USD) ou Euro (EUR). O valor digitado pertence à moeda escolhida. |
 | Data de aplicação | Quando o dinheiro foi investido; ponto de partida do rendimento. |
 | Data de vencimento | Opcional — deixe em branco para liquidez diária sem vencimento fixo. |
 | Liquidez | Diária ou no vencimento (informativo). |
@@ -126,7 +129,53 @@ Na tabela, use **Editar** para abrir o mesmo formulário já preenchido, ou **Ex
 |---|---|
 | ![Editar investimento](./screenshots/form-editar.png) | ![Confirmar exclusão](./screenshots/confirmar-exclusao.png) |
 
-## 7. Tipos e indexadores
+## 7. Patrimônio
+
+Patrimônio é a área operacional para acompanhar a planilha mensal. Ela trabalha com uma linha para cada combinação de **instituição + aplicação**, com valores de janeiro a dezembro e o saldo do ano anterior como base de janeiro.
+
+### Adicionar uma aplicação
+
+Em **Adicionar lançamento**, informe a instituição, a aplicação ou conta, a moeda e o mês inicial. A moeda pode ser BRL, USD ou EUR. Os valores mensais dessa linha são registrados na moeda escolhida.
+
+### Aportes e retiradas
+
+Use **Movimentar patrimônio** e escolha **Aporte em aplicação existente** ou **Retirada de aplicação existente**. Selecione a aplicação, o mês e o valor. O sistema usa automaticamente a moeda da linha.
+
+O aporte ou a retirada altera o saldo do mês, mas não é tratado como rentabilidade. A fórmula mensal é:
+
+```text
+Rentabilidade = (Saldo atual - Saldo anterior - Aportes + Retiradas) / Saldo anterior
+```
+
+### Alterar ou excluir lançamentos
+
+Use as caixas **Alterar lançamento** ou **Excluir lançamento**. Alterar permite mudar instituição, nome e moeda da linha. Excluir remove todos os meses daquele lançamento após confirmação.
+
+### Importar a planilha
+
+Clique em **Selecionar .xlsx** e escolha a planilha com abas anuais, como `2024`, `2025` e `2026`. Os valores são importados como BRL por padrão; depois você pode alterar a moeda da linha.
+
+## 8. Dashboard do Patrimônio
+
+O Dashboard é a área de leitura consolidada dos dados lançados em Patrimônio. Ele possui filtros por ano, instituição e moeda e mostra evolução mensal, composição por moeda, concentração por instituição e posições detalhadas.
+
+Os totais consolidados são sempre exibidos em BRL. Os valores originais continuam visíveis na moeda da aplicação.
+
+Para USD e EUR, a conversão usada é:
+
+```text
+Valor em BRL = Valor na moeda original x Fator de conversão
+```
+
+Exemplo:
+
+```text
+USD 10.000 x 5,50 = BRL 55.000
+```
+
+O Dashboard mostra o fator usado em cada cartão da composição por moeda. Os fatores são alterados em **Configurações**.
+
+## 9. Tipos e indexadores
 
 O tipo escolhido determina, sobretudo, se o investimento paga Imposto de Renda.
 
@@ -148,7 +197,7 @@ O tipo escolhido determina, sobretudo, se o investimento paga Imposto de Renda.
 | IPCA + | Spread fixo somado à inflação projetada | `6,2` → IPCA + 6,2% a.a. |
 | Prefixado | Taxa anual fixa | `12,5` → 12,5% a.a. |
 
-## 8. Como o cálculo funciona
+## 10. Como o cálculo funciona
 
 O valor estimado de cada investimento é recalculado toda vez que você abre a tela, com base na data de hoje (ou na data de vencimento, se ela já tiver passado).
 
@@ -165,17 +214,70 @@ O valor estimado de cada investimento é recalculado toda vez que você abre a t
    **LCI, LCA e Poupança são isentos** — o rendimento é somado ao principal sem desconto de IR.
 3. **IOF regressivo** — resgates com menos de 30 dias corridos pagam IOF sobre o rendimento (96% no dia 1, caindo até 0% no dia 30), aplicado antes do IR.
 
+### Fórmulas usadas nos campos
+
+As fórmulas abaixo mostram a lógica usada pelo sistema. Os valores são estimativas e não substituem o extrato da instituição.
+
+**Taxa anual equivalente**
+
+```text
+CDI       = (CDI informado / 100) x (taxa do investimento / 100)
+Selic     = (Selic informada / 100) x (taxa do investimento / 100)
+IPCA      = (1 + IPCA informado / 100) x (1 + spread / 100) - 1
+Prefixado = taxa do investimento / 100
+```
+
+Para `105` no indexador CDI e CDI de `10,65%`, por exemplo:
+
+```text
+Taxa anual = 10,65% x 105% = 11,1825% a.a.
+```
+
+**Capitalização no período**
+
+```text
+Dias úteis aproximados = dias corridos x (252 / 365)
+Fator bruto = (1 + taxa anual) ^ (dias úteis aproximados / 252)
+Valor bruto = principal x fator bruto
+Ganho bruto = valor bruto - principal
+```
+
+**Impostos**
+
+```text
+IOF = máximo(0, ganho bruto) x alíquota IOF do dia
+Ganho após IOF = ganho bruto - IOF
+IR = máximo(0, ganho após IOF) x alíquota IR
+Valor líquido = máximo(0, principal + ganho após IOF - IR)
+```
+
+LCI, LCA e Poupança não aplicam IR. Perdas não geram IR nem IOF.
+
+**Rentabilidade mensal do Patrimônio**
+
+```text
+Fluxo líquido = aportes - retiradas
+Rentabilidade = (saldo atual - saldo anterior - fluxo líquido) / saldo anterior
+```
+
+Assim, um aporte aumenta o patrimônio, mas não aparece como rendimento. Uma retirada reduz o patrimônio, mas não aparece automaticamente como perda de mercado.
+
 > **Isto é uma estimativa.** O cálculo usa uma aproximação de dias úteis e as taxas de referência informadas em Configurações — confira sempre o extrato oficial da instituição antes de decidir um resgate.
 
-## 9. Configurações
+## 11. Configurações
 
-As três taxas de referência usadas em todos os cálculos ficam centralizadas aqui. Atualize-as sempre que o Copom mudar a Selic (o que arrasta o CDI junto) ou quando a projeção de inflação mudar.
+As taxas de referência e os fatores de conversão usados nos cálculos ficam centralizados aqui. Atualize CDI, Selic e IPCA quando necessário. Atualize também:
+
+- **1 USD vale (BRL)**: fator usado para converter dólares para reais;
+- **1 EUR vale (BRL)**: fator usado para converter euros para reais.
+
+O Dashboard usa os valores salvos imediatamente após a atualização para recalcular os totais consolidados.
 
 ![Tela de configurações](./screenshots/configuracoes.png)
 
 Como o CDI normalmente fica pouco abaixo da Selic, uma atualização vale para toda a carteira de uma vez — não é preciso editar investimento por investimento.
 
-## 10. Perguntas frequentes
+## 12. Perguntas frequentes
 
 **Perdi minha chave de licença. E agora?**
 Fale com quem vendeu o Investe Valor para você — a chave pode ser reenviada a qualquer momento, já que ela não expira sozinha (a menos que tenha sido emitida com validade definida).

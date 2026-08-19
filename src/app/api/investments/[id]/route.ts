@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { getInvestment, updateInvestment, deleteInvestment } from "@/lib/investments-repo";
 import { investmentSchema } from "@/lib/validation";
 import { getLicenseOrNull, licenseErrorResponse } from "@/lib/license";
+import { getAuthenticatedUserOrNull } from "@/lib/auth";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, { params }: Params) {
   if (!getLicenseOrNull()) return licenseErrorResponse();
+  if (!(await getAuthenticatedUserOrNull())) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   const { id } = await params;
   const investment = await getInvestment(id);
   if (!investment) {
@@ -17,6 +19,7 @@ export async function GET(_request: Request, { params }: Params) {
 
 export async function PUT(request: Request, { params }: Params) {
   if (!getLicenseOrNull()) return licenseErrorResponse();
+  if (!(await getAuthenticatedUserOrNull())) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   const { id } = await params;
   const body = await request.json();
   const parsed = investmentSchema.safeParse(body);
@@ -34,6 +37,7 @@ export async function PUT(request: Request, { params }: Params) {
 
 export async function DELETE(_request: Request, { params }: Params) {
   if (!getLicenseOrNull()) return licenseErrorResponse();
+  if (!(await getAuthenticatedUserOrNull())) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   const { id } = await params;
   const ok = await deleteInvestment(id);
   if (!ok) {

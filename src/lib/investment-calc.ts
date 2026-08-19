@@ -1,3 +1,4 @@
+import { differenceInBusinessDays } from "date-fns";
 import type { Currency, IndexType, InvestmentType } from "@/generated/prisma/client";
 
 export type RatesSettings = {
@@ -19,7 +20,6 @@ export type InvestmentLike = {
 };
 
 const BUSINESS_DAYS_PER_YEAR = 252;
-const CALENDAR_DAYS_PER_YEAR = 365;
 
 const TAX_EXEMPT_TYPES: InvestmentType[] = ["LCI", "LCA", "POUPANCA"];
 
@@ -32,9 +32,9 @@ export function calendarDaysBetween(start: Date, end: Date): number {
   return Math.max(0, Math.round(ms / (1000 * 60 * 60 * 24)));
 }
 
-/** Approximates business days from calendar days using the average ratio of 252/365 business days per year. */
-function businessDaysApprox(calendarDays: number): number {
-  return calendarDays * (BUSINESS_DAYS_PER_YEAR / CALENDAR_DAYS_PER_YEAR);
+/** Counts weekdays; exchange-specific holidays are not modeled by this local projection. */
+function businessDaysBetween(start: Date, end: Date): number {
+  return Math.max(0, differenceInBusinessDays(end, start));
 }
 
 /** Annual equivalent rate (as a decimal, e.g. 0.12 for 12%) that the position grows at, before compounding basis is applied. */
@@ -56,7 +56,8 @@ export function grossFactor(inv: InvestmentLike, rates: RatesSettings, asOfDate:
   const effectiveEnd = inv.maturityDate && inv.maturityDate < asOfDate ? inv.maturityDate : asOfDate;
   const calendarDays = calendarDaysBetween(inv.applicationDate, effectiveEnd);
   if (calendarDays <= 0) return 1;
-  const businessDays = businessDaysApprox(calendarDays);
+  const businessDays = businessDaysBetween(inv.applicationDate, effectiveEnd);
+  if (businessDays <= 0) return 1;
   const rate = annualRate(inv, rates);
   return Math.pow(1 + rate, businessDays / BUSINESS_DAYS_PER_YEAR);
 }

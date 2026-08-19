@@ -1,12 +1,6 @@
 "use strict";
-// Applies the SQL migrations in prisma/migrations/*/migration.sql, in order, to a brand-new
-// SQLite file. Only runs anything when the database file doesn't exist yet — every Electron
-// install starts from an empty database, so there's no need to bundle the Prisma CLI (or track
-// which migrations already ran) just to create the schema once on first launch.
-//
-// This intentionally does not handle applying *new* migrations to an *existing* database across
-// app updates — out of scope for v1, since there have been no released versions to upgrade from
-// yet. A future update mechanism will need real incremental migration tracking.
+// Applies the SQL migrations in order and tracks each applied migration in the app database so
+// packaged app updates can evolve existing databases.
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -22,8 +16,6 @@ function loadDatabase(standaloneDir) {
 }
 
 function ensureDatabase(dbPath, migrationsDir, standaloneDir) {
-  if (fs.existsSync(dbPath)) return;
-
   const Database = loadDatabase(standaloneDir);
   const db = new Database(dbPath);
   try {
@@ -33,14 +25,110 @@ function ensureDatabase(dbPath, migrationsDir, standaloneDir) {
       .map((entry) => entry.name)
       .sort();
 
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS "__investe_valor_migrations" (
+        "name" TEXT NOT NULL PRIMARY KEY,
+        "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    baselineLegacyMigrations(db, migrationFolders);
+
+    const applied = new Set(
+      db
+        .prepare('SELECT "name" FROM "__investe_valor_migrations"')
+        .all()
+        .map((row) => row.name),
+    );
+
     for (const folder of migrationFolders) {
+      if (applied.has(folder)) continue;
       const sqlPath = path.join(migrationsDir, folder, "migration.sql");
       if (!fs.existsSync(sqlPath)) continue;
-      db.exec(fs.readFileSync(sqlPath, "utf8"));
+      const applyMigration = db.transaction(() => {
+        db.exec(fs.readFileSync(sqlPath, "utf8"));
+        db.prepare(
+          'INSERT INTO "__investe_valor_migrations" ("name") VALUES (?)',
+        ).run(folder);
+      });
+      applyMigration();
     }
   } finally {
     db.close();
   }
+}
+
+function baselineLegacyMigrations(db, migrationFolders) {
+  const hasUserTables = db
+    .prepare(
+      "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND name != '__investe_valor_migrations' LIMIT 1",
+    )
+    .get();
+  if (!hasUserTables) return;
+
+  const appliedCount = db
+    .prepare('SELECT COUNT(*) AS count FROM "__investe_valor_migrations"')
+    .get().count;
+  if (appliedCount > 0) return;
+
+  const hasTable = (table) =>
+    Boolean(
+      db
+        .prepare(
+          "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+        )
+        .get(table),
+    );
+  const columns = (table) =>
+    new Set(
+      db
+        .prepare(`PRAGMA table_info("${table}")`)
+        .all()
+        .map((row) => row.name),
+    );
+  const investmentColumns = columns("Investment");
+  const settingsColumns = columns("Settings");
+  const portfolioColumns = columns("PortfolioEntry");
+
+  for (const folder of migrationFolders) {
+    const applied =
+      (folder.endsWith("_init") &&
+        hasTable("Investment") &&
+        hasTable("Settings")) ||
+      (folder.endsWith("_remove_withdrawal") && !hasTable("Withdrawal")) ||
+      (folder.endsWith("_encrypt_sensitive_fields") &&
+        hasTextColumn(db, "Investment", "name")) ||
+      (folder.endsWith("_add_portfolio_entries") &&
+        hasTable("PortfolioEntry")) ||
+      (folder.endsWith("_add_investment_movements") &&
+        hasTable("InvestmentMovement")) ||
+      (folder.endsWith("_add_investment_currencies") &&
+        investmentColumns.has("currency") &&
+        settingsColumns.has("usdToBrl") &&
+        settingsColumns.has("eurToBrl")) ||
+      (folder.endsWith("_add_portfolio_currency") &&
+        portfolioColumns.has("currency")) ||
+      (folder.endsWith("_track_portfolio_cash_flows") &&
+        portfolioColumns.has("contributions") &&
+        portfolioColumns.has("withdrawals")) ||
+      (folder.endsWith("_add_authentication") &&
+        hasTable("User") &&
+        hasTable("AuthSession") &&
+        hasTable("PasswordResetToken"));
+
+    if (applied) {
+      db.prepare(
+        'INSERT OR IGNORE INTO "__investe_valor_migrations" ("name") VALUES (?)',
+      ).run(folder);
+    }
+  }
+}
+
+function hasTextColumn(db, table, column) {
+  return db
+    .prepare(`PRAGMA table_info("${table}")`)
+    .all()
+    .some((row) => row.name === column && row.type.toUpperCase() === "TEXT");
 }
 
 module.exports = { ensureDatabase };

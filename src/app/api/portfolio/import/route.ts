@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getLicenseOrNull, licenseErrorResponse } from "@/lib/license";
+import { getAuthenticatedUserOrNull } from "@/lib/auth";
 import * as XLSX from "xlsx";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +47,7 @@ function rowsForSheet(rows: unknown[][], year: number) {
 
 export async function POST(request: Request) {
   if (!getLicenseOrNull()) return licenseErrorResponse();
+  if (!(await getAuthenticatedUserOrNull())) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   const form = await request.formData();
   const file = form.get("file");
   if (!(file instanceof File)) return NextResponse.json({ error: "Selecione um arquivo Excel." }, { status: 400 });

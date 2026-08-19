@@ -10,7 +10,7 @@ export function Label({ children, htmlFor }: { children: ReactNode; htmlFor?: st
 }
 
 const fieldClasses =
-  "w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary";
+  "w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   const { className, ...rest } = props;

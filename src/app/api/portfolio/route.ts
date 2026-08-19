@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getLicenseOrNull, licenseErrorResponse } from "@/lib/license";
+import { getAuthenticatedUserOrNull } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   if (!getLicenseOrNull()) return licenseErrorResponse();
+  if (!(await getAuthenticatedUserOrNull())) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   const year = Number(new URL(request.url).searchParams.get("year") ?? new Date().getFullYear());
   if (!Number.isInteger(year) || year < 2000 || year > 2200) {
     return NextResponse.json({ error: "Ano inválido." }, { status: 400 });
@@ -16,6 +18,7 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   if (!getLicenseOrNull()) return licenseErrorResponse();
+  if (!(await getAuthenticatedUserOrNull())) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   const body = await request.json();
   const year = Number(body.year);
   const month = Number(body.month);
@@ -31,6 +34,10 @@ export async function PUT(request: Request) {
   }
 
   if (!Number.isFinite(movementAmount) || movementAmount < 0) return NextResponse.json({ error: "Movimentação inválida." }, { status: 400 });
+  const existing = await prisma.portfolioEntry.findUnique({ where: { year_month_institution_category: { year, month, institution, category } } });
+  if (existing && existing.currency !== currency) {
+    return NextResponse.json({ error: "A moeda de um lançamento existente não pode ser alterada neste campo. Use Alterar lançamento." }, { status: 409 });
+  }
   const movementData = movementType === "APORTE" ? { contributions: { increment: movementAmount } } : movementType === "RETIRADA" ? { withdrawals: { increment: movementAmount } } : {};
   const entry = await prisma.portfolioEntry.upsert({
     where: { year_month_institution_category: { year, month, institution, category } },
@@ -42,6 +49,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   if (!getLicenseOrNull()) return licenseErrorResponse();
+  if (!(await getAuthenticatedUserOrNull())) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   const body = await request.json();
   const month = body.month === undefined ? undefined : Number(body.month);
   await prisma.portfolioEntry.deleteMany({ where: { year: Number(body.year), month, institution: String(body.institution ?? ""), category: String(body.category ?? "") } });
@@ -50,6 +58,7 @@ export async function DELETE(request: Request) {
 
 export async function PATCH(request: Request) {
   if (!getLicenseOrNull()) return licenseErrorResponse();
+  if (!(await getAuthenticatedUserOrNull())) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   const body = await request.json();
   const year = Number(body.year);
   const oldInstitution = String(body.oldInstitution ?? "").trim();
@@ -60,7 +69,11 @@ export async function PATCH(request: Request) {
   if (!Number.isInteger(year) || !oldInstitution || !oldCategory || !institution || !category) {
     return NextResponse.json({ error: "Informe os dados do lançamento." }, { status: 400 });
   }
-  const result = await prisma.portfolioEntry.updateMany({ where: { year, institution: oldInstitution, category: oldCategory }, data: { institution, category, currency } });
-  if (result.count === 0) return NextResponse.json({ error: "Lançamento não encontrado para este ano." }, { status: 404 });
-  return NextResponse.json({ ok: true });
+  try {
+    const result = await prisma.portfolioEntry.updateMany({ where: { year, institution: oldInstitution, category: oldCategory }, data: { institution, category, currency } });
+    if (result.count === 0) return NextResponse.json({ error: "Lançamento não encontrado para este ano." }, { status: 404 });
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: "Já existe um lançamento com essa instituição, aplicação e mês." }, { status: 409 });
+  }
 }

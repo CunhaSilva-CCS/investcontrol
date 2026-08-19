@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f5f0;
+  --background: #f4f7f7;
   --surface: #ffffff;
-  --surface-muted: #f1ede2;
-  --foreground: #14120d;
-  --muted: #6b6558;
-  --border: #e3ddcd;
-  --primary: #8a6a23;
+  --surface-muted: #edf3f2;
+  --foreground: #142322;
+  --muted: #657675;
+  --border: #d9e5e3;
+  --primary: #0f766e;
   --primary-foreground: #ffffff;
-  --success: #16a34a;
-  --danger: #dc2626;
-  --warning: #d97706;
+  --success: #16856f;
+  --danger: #c2414d;
+  --warning: #b7791f;
 }
 
 @theme inline {
@@ -27,23 +27,22 @@
   --color-danger: var(--danger);
   --color-warning: var(--warning);
   --font-sans:
-    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    Roboto, sans-serif;
+    "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b0b0c;
-    --surface: #17140d;
-    --surface-muted: #211d14;
-    --foreground: #f3efe4;
-    --muted: #a79a7e;
-    --border: #332c1e;
-    --primary: #d4af37;
-    --primary-foreground: #14120d;
-    --success: #4ade80;
-    --danger: #f87171;
-    --warning: #fbbf24;
+    --background: #0d1818;
+    --surface: #142323;
+    --surface-muted: #1b3030;
+    --foreground: #e8f3f1;
+    --muted: #9ab0ad;
+    --border: #294342;
+    --primary: #4ec5b6;
+    --primary-foreground: #09201d;
+    --success: #62d1a9;
+    --danger: #f2838c;
+    --warning: #e6bd65;
   }
 }
 
@@ -51,6 +50,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  letter-spacing: 0;
+  line-height: 1.5;
 }
 
 ::selection {
@@ -64,6 +65,19 @@ input,
 select,
 textarea {
   transition-duration: 160ms;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+::placeholder {
+  color: color-mix(in srgb, var(--muted) 72%, transparent);
 }
 
 * {
@@ -97,4 +111,12 @@ table[class*="min-w-[1900px]"] tbody tr:hover {
 
 .portfolio-action-card {
   border-color: color-mix(in srgb, var(--primary) 28%, var(--border));
+}
+
+.chart-surface {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--primary) 8%, var(--surface)),
+    var(--surface)
+  );
 }

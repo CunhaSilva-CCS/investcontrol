@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">Investe Valor</title>
+  <rect width="1024" height="1024" rx="190" fill="#8a6a23"/>
+  <rect x="298" y="538" width="80" height="214" rx="18" fill="#cfc09d"/>
+  <rect x="432" y="432" width="80" height="320" rx="18" fill="#e4dccb"/>
+  <rect x="566" y="298" width="80" height="454" rx="18" fill="#ffffff"/>
+  <path d="M258 684 408 512l104 88 112-148 84 94 104-150" fill="none" stroke="#ffffff" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m758 396 94-28-19 96" fill="none" stroke="#ffffff" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

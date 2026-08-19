@@ -14,7 +14,7 @@ const path = require("node:path");
 const fs = require("node:fs");
 const http = require("node:http");
 const crypto = require("node:crypto");
-const { app, BrowserWindow, dialog } = require("electron");
+const { app, BrowserWindow, dialog, safeStorage } = require("electron");
 const { ensureDatabase } = require("./migrate");
 
 const PORT = 17321;
@@ -54,7 +54,7 @@ async function start() {
     console.error("Falha ao iniciar o Investe Valor:", err);
     dialog.showErrorBox(
       "Não foi possível iniciar o Investe Valor",
-      `${err.message || err}\n\n${err.stack || ""}`.trim()
+      `${err.message || err}\n\n${err.stack || ""}`.trim(),
     );
     app.quit();
   }
@@ -68,11 +68,7 @@ function prepareEnvironment() {
   const keyPath = path.join(userDataDir, "encryption.key");
   const licensePath = path.join(userDataDir, "license.key");
 
-  let encryptionKey = fs.existsSync(keyPath) ? fs.readFileSync(keyPath, "utf8").trim() : "";
-  if (!encryptionKey) {
-    encryptionKey = crypto.randomBytes(32).toString("base64");
-    fs.writeFileSync(keyPath, encryptionKey, { mode: 0o600 });
-  }
+  const encryptionKey = loadEncryptionKey(keyPath);
 
   process.env.NODE_ENV = "production";
   process.env.DATABASE_URL = `file:${dbPath}`;
@@ -84,6 +80,48 @@ function prepareEnvironment() {
   const migrationsDir = path.join(process.resourcesPath, "migrations");
   const standaloneDir = path.join(process.resourcesPath, "standalone");
   ensureDatabase(dbPath, migrationsDir, standaloneDir);
+}
+
+function loadEncryptionKey(keyPath) {
+  if (!safeStorage.isEncryptionAvailable()) {
+    throw new Error(
+      "O armazenamento seguro do sistema operacional não está disponível para proteger a chave dos dados.",
+    );
+  }
+
+  if (fs.existsSync(keyPath)) {
+    const storedKey = fs.readFileSync(keyPath, "utf8").trim();
+
+    if (storedKey.startsWith("safe-v1:")) {
+      try {
+        return safeStorage.decryptString(
+          Buffer.from(storedKey.slice("safe-v1:".length), "base64"),
+        );
+      } catch (err) {
+        throw new Error(
+          `Não foi possível abrir a chave de criptografia protegida: ${err.message || err}`,
+        );
+      }
+    }
+
+    // Migrate keys created by older builds without changing the key itself.
+    if (storedKey) {
+      persistEncryptionKey(keyPath, storedKey);
+      return storedKey;
+    }
+  }
+
+  const encryptionKey = crypto.randomBytes(32).toString("base64");
+  persistEncryptionKey(keyPath, encryptionKey);
+  return encryptionKey;
+}
+
+function persistEncryptionKey(keyPath, encryptionKey) {
+  const protectedKey = safeStorage
+    .encryptString(encryptionKey)
+    .toString("base64");
+  fs.writeFileSync(keyPath, `safe-v1:${protectedKey}\n`, { mode: 0o600 });
+  fs.chmodSync(keyPath, 0o600);
 }
 
 function startServer() {
@@ -113,6 +151,7 @@ function waitForServer(url, timeoutMs = 20000) {
 }
 
 function createWindow() {
+  const appUrl = `http://${HOST}:${PORT}/`;
   const win = new BrowserWindow({
     width: 1280,
     height: 860,
@@ -124,7 +163,12 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: true,
     },
   });
-  win.loadURL(`http://${HOST}:${PORT}/`);
+  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  win.webContents.on("will-navigate", (event, url) => {
+    if (url !== appUrl) event.preventDefault();
+  });
+  win.loadURL(appUrl);
 }

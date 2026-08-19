@@ -11,7 +11,7 @@ export function PortfolioPieChart({ data }: { data: Slice[] }) {
   }
 
   return (
-    <div className="h-72 w-full">
+    <div className="chart-surface h-72 w-full rounded-lg border border-border p-2">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie data={data} dataKey="value" nameKey="label" innerRadius={55} outerRadius={90} paddingAngle={2}>
